@@ -1,0 +1,24 @@
+name: vite-docker prod
+run-name: vite-docker
+on:
+  pull_request:
+    types:
+    - closed
+    branches:
+    - main
+jobs:
+  Deploy_project:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🐧 Let's cook mister"
+      - name: Check out repository code
+        uses: actions/checkout@v5
+      - run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/vite-docker .
+      - name: Login to Docker Hub
+        uses: docker/login-action@v5
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: Push Docker image to Docker Hub
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/vite-docker:latest
+      - run: curl ${{ secrets.DEPLOY_HOOK }}
